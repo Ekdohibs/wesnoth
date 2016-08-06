@@ -60,9 +60,11 @@ Version 1.13.5+dev:
    * Fixed issues with using [endlevel] in victory/defeat events
    * The {MAGENTA_IS_THE_TEAM_COLOR} macro is no longer needed in [unit_type]
      It is now the default behaviour unless overridden with the flag_rgb key.
-* Lua API:
-   * Added new functions wesnoth.fire_event_by_id and fire_event_by_name. The
-     old function wesnoth.fire_event is now an alias for wesnoth.fire_event_by_name
+   * New key ability_type in standard unit filters, which matches if the unit has
+     any ability of the specified type (tag name).
+ * Lua API:
+   * Added new functions wesnoth.fire_event_by_id and fire_event_by_name. The old
+     function wesnoth.fire_event is now an alias for wesnoth.fire_event_by_name
    * Added new function wesnoth.remove_modifications, which removes applied
      modifications of the chosen type from a unit. The most efficient use is to
      remove all modifications with a specific duration value.
