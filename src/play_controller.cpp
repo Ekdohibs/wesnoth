@@ -1053,7 +1053,7 @@ bool play_controller::is_browsing() const
 		return true;
 	}
 	const team& t = current_team();
-	return !t.has_shared_control() || !t.is_proxy_human();
+	return !t.is_local_human() || !t.is_proxy_human();
 }
 
 void play_controller::play_slice_catch()
