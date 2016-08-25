@@ -32,7 +32,60 @@
 namespace wesnothd {
 
 typedef std::vector<socket_ptr> user_vector;
-typedef std::vector<socket_ptr> side_vector;
+
+struct side
+{
+	size_t current_player_;
+	user_vector players_;
+	side() :
+		current_player_(0),
+		players_()
+	{};
+	side(int current_player, user_vector players) :
+		current_player_(current_player),
+		players_(players)
+	{};
+	side(socket_ptr player) :
+		current_player_(0),
+		players_()
+	{
+		players_.push_back(player);
+	};
+	inline bool empty () const {
+		return players_.empty();
+	};
+	inline socket_ptr active_player() const {
+		return empty() ? socket_ptr() : players_[current_player_];
+	};
+	inline void set_control(const socket_ptr &player) {
+		current_player_ = 0;
+		players_.clear();
+		players_.push_back(player);
+	};
+	/** Checks if the side is solely controlled by the given player */
+	inline bool is_player(const socket_ptr &player) const {
+		return players_.size() == 1 && players_[0] == player;
+	};
+	inline bool is_controlled_by(const socket_ptr &player) const {
+		return std::find(players_.begin(), players_.end(), player) == players_.end();
+	};
+};
+
+inline std::ostream & operator << (std::ostream &os, const side &s) {
+	if (s.players_.empty()) {
+		os << "[]";
+		return os;
+	}
+	for (size_t i = 0; i < s.players_.size(); i++) {
+		if (i == s.current_player_) os << "[";
+		os << s.players_[i];
+		if (i == s.current_player_) os << "]";
+		if (i < s.players_.size() - 1) os << ",";
+	}
+	return os;
+};
+
+typedef std::vector<side> side_vector;
 
 class game
 {
@@ -253,7 +306,7 @@ private:
 
 	size_t current_side() const { return (nsides_ ? end_turn_ % nsides_ : 0); }
 	socket_ptr current_player() const
-	{ return (nsides_ ? sides_[current_side()] : socket_ptr()); }
+	{ return (nsides_ ? sides_[current_side()].active_player() : socket_ptr()); }
 	bool is_current_player(const socket_ptr player) const
 	{ return (current_player() == player); }
 	bool is_muted_observer(const socket_ptr player) const;
@@ -277,7 +330,7 @@ private:
 	 * or controller type (human or ai).
 	 */
 	void change_controller(const size_t side_num,
-			const socket_ptr sock,
+			const side& new_side,
 			const std::string& player_name,
 			const bool player_left = true);
 	void transfer_ai_sides(const socket_ptr player);
@@ -302,6 +355,7 @@ private:
 
 	/** Shortcut to a convenience function for finding a user by name. */
 	socket_ptr find_user(const simple_wml::string_span& name);
+	socket_ptr find_user(const std::string& name);
 
 	bool observers_can_label() const { return false; }
 	bool observers_can_chat() const { return true; }

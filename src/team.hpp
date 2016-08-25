@@ -22,6 +22,8 @@
 #include "units/ptr.hpp"
 #include "util.hpp"
 #include "config.hpp"
+#include "serialization/string_utils.hpp" // For utils::split
+#include "game_preferences.hpp"
 
 #include <set>
 
@@ -256,6 +258,13 @@ public:
 	bool is_ai() const { return info_.controller == CONTROLLER::AI; }
 
 	bool is_local_human() const {  return is_human() && is_local(); }
+	bool has_shared_control() const {
+		if (!is_human()) return false;
+		for (std::string pname : utils::split(info_.current_player, ',')) {
+			if (pname == preferences::login()) return true;
+		}
+		return false;
+	}
 	bool is_local_ai() const { return is_ai() && is_local(); }
 	bool is_network_human() const { return is_human() && is_network(); }
 	bool is_network_ai() const { return is_ai() && is_network(); }

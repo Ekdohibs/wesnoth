@@ -401,7 +401,7 @@ void play_controller::init_side_begin()
 
 	// If we are observers we move to watch next team if it is allowed
 	if ((is_observer() && !current_team().get_disallow_observers())
-		|| (current_team().is_local_human() && !this->is_replay()))
+		|| (current_team().has_shared_control() && !this->is_replay()))
 	{
 		update_gui_to_player(current_side() - 1);
 	}
@@ -705,7 +705,7 @@ bool play_controller::is_team_visible(int team_num, bool observer) const
 		return !t.get_disallow_observers() && !t.is_empty();
 	}
 	else {
-		return t.is_local_human() && !t.is_idle();
+		return t.has_shared_control() && !t.is_idle();
 	}
 }
 
@@ -1053,7 +1053,7 @@ bool play_controller::is_browsing() const
 		return true;
 	}
 	const team& t = current_team();
-	return !t.is_local_human() || !t.is_proxy_human();
+	return !t.has_shared_control() || !t.is_proxy_human();
 }
 
 void play_controller::play_slice_catch()
@@ -1127,6 +1127,7 @@ bool play_controller::can_use_synced_wml_menu() const
 std::set<std::string> play_controller::all_players() const
 {
 	std::set<std::string> res = gui_->observers();
+//TODO
 	for (const team& t : get_teams_const())
 	{
 		if (t.is_human()) {
